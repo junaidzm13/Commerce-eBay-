@@ -1,0 +1,88 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{ listing.title }}</h2>
+
+    {% if user.is_authenticated %}
+      {% if listing.active == False %}
+        <div><h4><p>Listing closed!</p></h4></div>
+        {% if winner %}
+          <div>
+            <h4><p>You are the winner on this listing!</p></h4>
+          </div>
+        {% endif %}
+
+      {% else %}
+        <div>
+          {% if inwatch == True %}
+            <p>In watchlist.</p>
+          {% else %}
+            <p>Not in watchlist</p>
+          {% endif %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="submit" value="Add to watchlist" name="towatchlist">
+            <input type="submit" value="Remove from watchlist" name="remwatchlist">
+          </form>
+        </div>
+      {% endif %}
+    {% endif %}
+
+      <table>
+        <tr>
+          <th> Title: {{ listing.title }} </th>
+          <th> Category: {{ listing.category }} </th>
+        </tr>
+        <tr><td> Description: {{ listing.description }} </td></tr>
+        <tr><td> Current price: ${{ listing.current_bid }} </td></tr>
+        <tr><td> <img src="{{ listing.image_url }}" width=20%> </td></tr>
+      </table>
+    </div>
+
+    {% if listing.active == True and user.is_authenticated %}
+    <div>
+      {% if message %}
+        <p>{{ message }}! Place a bid higher than {{ listing.current_bid }}!</p>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="number" placeholder="{{ listing.current_bid }}" name="newbid" label="New bid">
+        <input type="submit" value="Sumbit bid" name="submitbid">
+      </form>
+    </div>
+    {% endif %}
+
+    <h5>Comments</h5>
+    <div>
+      <ul>
+        {% for comment in comments %}
+          <li>
+            <h6><p>{{ comment.user }}</p></h6>
+            <p>{{ comment.comment }}</p>
+          </li>
+        {% empty %}
+          No comments yet.
+        {% endfor %}
+        {% if listing.active == True and user.is_authenticated %}
+        <li>
+          <form method="post">
+            {% csrf_token %}
+            <input type="text" name="newcomment" label="New comment">
+            <input type="submit" value="Comment" name="submitcomment">
+          </form>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+
+    {% if listing.active == True and user.is_authenticated %}
+      {% if owner %}
+        <div>
+          <form method="post">
+            {% csrf_token %}
+            <input type="submit" value="Close listing" name="closelisting">
+          </form>
+        </div>
+      {% endif %}
+    {% endif %}
+{% endblock %}
